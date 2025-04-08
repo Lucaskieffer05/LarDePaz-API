@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LarDePaz_API.Models
 {
-    public class ContratoExpensasHistorial
+    public class ContratoExpensasHistorial : AuditableEntity
     {
         [Key]
         public int Id { get; set; }
