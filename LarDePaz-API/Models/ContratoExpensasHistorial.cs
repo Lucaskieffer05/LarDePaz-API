@@ -8,6 +8,8 @@ namespace LarDePaz_API.Models
         [Key]
         public int Id { get; set; }
         public int ContratoId { get; set; }
+        public int ImporteTotalPagado { get; set; }
+        public int ImporteTotalExpensa { get; set; }
         public int Saldo { get; set; }
 
         [ForeignKey("ContratoId")]

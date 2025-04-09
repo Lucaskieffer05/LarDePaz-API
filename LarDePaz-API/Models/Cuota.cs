@@ -12,6 +12,7 @@ namespace LarDePaz_API.Models
         public DateTime FechaVencimiento { get; set; }
         public DateTime FechaPago { get; set; }
         public int Importe { get; set; }
+        public int importePagado { get; set; }
         public int ImporteInteres { get; set; }
         public int ImporteTotal { get; set; }
         public string Estado { get; set; } = null!;

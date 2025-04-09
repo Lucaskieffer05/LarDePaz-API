@@ -10,6 +10,7 @@ namespace LarDePaz_API.Models
         public int NumPeriodo { get; set; }
         public int YearPeriodo { get; set; }
         public int Importe { get; set; }
+        public int ImportePagado { get; set; }
         public DateTime FechaDesde { get; set; }
         public DateTime FechaHasta { get; set; }
         public DateTime FechaPago { get; set; }

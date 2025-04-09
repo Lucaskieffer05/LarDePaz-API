@@ -7,10 +7,8 @@ namespace LarDePaz_API.Models
     {
         [Key]
         public int Id { get; set; }
-
         public int ParcelaId { get; set; }
         public int ContratoId { get; set; }
-
         public DateTime FechaInicio { get; set; }
         public DateTime? FechaFin { get; set; }
 
