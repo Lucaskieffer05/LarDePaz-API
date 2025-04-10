@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-namespace LarDePaz_API.Models
+﻿namespace LarDePaz_API.Models.DTO.Cliente
 {
-    public class Cliente : AuditableEntity
+    public class GetOneRequest
     {
-        [Key]
+        public int Id { get; set; }
+    }
+    
+    public class GetOneResponse
+    {
         public int Id { get; set; }
         public string NombreApellido { get; set; } = null!;
         public string DNI { get; set; } = null!;
@@ -15,7 +17,6 @@ namespace LarDePaz_API.Models
         public string? Telefono2 { get; set; }
         public string? Email { get; set; }
         public string? RedSocial { get; set; }
-
-        public List<Contrato> Contratos { get; set; } = [];
     }
+
 }

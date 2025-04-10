@@ -8,8 +8,6 @@ namespace LarDePaz_API.Models
         public int Id { get; set; }
         public int CobradorId { get; set; }
         public int TitularId { get; set; }
-        public int CoTitularId { get; set; }
-        public int SegundoTitularId { get; set; }
         public int ContratoCuotaHistorialId { get; set; }
         public int ContratoExpensasHistorialId { get; set; }
 
@@ -48,6 +46,9 @@ namespace LarDePaz_API.Models
         public int PagoAcumulado { get; set; }
         public int CantidadParcelas { get; set; }
         public string Estado { get; set; } = null!;
+
+        [ForeignKey("TitularId")]
+        public virtual Cliente Titular { get; set; } = null!;
 
         [ForeignKey("CobradorId")]
         public virtual Cobrador? Cobrador { get; set; }

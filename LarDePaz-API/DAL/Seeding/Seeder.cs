@@ -14,13 +14,15 @@ namespace LarDePaz_API.DAL.Seeding
         {
             try
             {
-                var tx = await _db.Database.BeginTransactionAsync();
-
+                //Ya posee transacciones las migraciones
                 var migrations = await _db.Database.GetPendingMigrationsAsync();
 
                 if (migrations.Any())
                     _db.Database.Migrate();
 
+                //Terminada la migracion, se inicia la transaccion
+                var tx = await _db.Database.BeginTransactionAsync();
+                
                 // Executed only once when the database is created
                 if (await _db.Role.AnyAsync(x => x.Name == Roles.ADMIN))
                     return;

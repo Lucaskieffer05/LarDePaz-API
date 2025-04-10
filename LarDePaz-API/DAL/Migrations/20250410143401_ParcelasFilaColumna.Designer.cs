@@ -4,6 +4,7 @@ using LarDePaz_API.DAL.DB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LarDePaz_API.Migrations
 {
     [DbContext(typeof(APIContext))]
-    partial class APIContextModelSnapshot : ModelSnapshot
+    [Migration("20250410143401_ParcelasFilaColumna")]
+    partial class ParcelasFilaColumna
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,6 +133,9 @@ namespace LarDePaz_API.Migrations
                     b.Property<int>("CantidadParcelas")
                         .HasColumnType("int");
 
+                    b.Property<int>("CoTitularId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CobradorId")
                         .HasColumnType("int");
 
@@ -224,6 +230,9 @@ namespace LarDePaz_API.Migrations
                     b.Property<int>("Saldo")
                         .HasColumnType("int");
 
+                    b.Property<int>("SegundoTitularId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Tarjeta")
                         .HasColumnType("nvarchar(max)");
 
@@ -253,8 +262,6 @@ namespace LarDePaz_API.Migrations
                     b.HasIndex("ContratoCuotaHistorialId");
 
                     b.HasIndex("ContratoExpensasHistorialId");
-
-                    b.HasIndex("TitularId");
 
                     b.ToTable("Contrato");
                 });
@@ -659,19 +666,11 @@ namespace LarDePaz_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LarDePaz_API.Models.Cliente", "Titular")
-                        .WithMany("Contratos")
-                        .HasForeignKey("TitularId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Cobrador");
 
                     b.Navigation("ContratoCuotaHistorial");
 
                     b.Navigation("ContratoExpensasHistorial");
-
-                    b.Navigation("Titular");
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.Cuota", b =>
@@ -750,11 +749,6 @@ namespace LarDePaz_API.Migrations
                         .IsRequired();
 
                     b.Navigation("Manzana");
-                });
-
-            modelBuilder.Entity("LarDePaz_API.Models.Cliente", b =>
-                {
-                    b.Navigation("Contratos");
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.Contrato", b =>
