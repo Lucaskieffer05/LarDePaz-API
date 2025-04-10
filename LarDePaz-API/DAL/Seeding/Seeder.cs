@@ -54,6 +54,8 @@ namespace LarDePaz_API.DAL.Seeding
                 //SeedProfessions(); Ejemplo de como definir cosas por defecto
 
                 await _db.SaveChangesAsync();
+
+                await tx.CommitAsync();
             }
             catch (Exception)
             {

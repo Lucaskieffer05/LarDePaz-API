@@ -6,6 +6,7 @@ namespace LarDePaz_API.Models
     {
         [Key]
         public int Id { get; set; }
+
         public string NombreApellido { get; set; } = null!;
         public string DNI { get; set; } = null!;
         public string Direccion { get; set; } = null!;
@@ -15,6 +16,5 @@ namespace LarDePaz_API.Models
         public string? Telefono2 { get; set; }
         public string? Email { get; set; }
         public string? RedSocial { get; set; }
-
     }
 }

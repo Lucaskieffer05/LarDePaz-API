@@ -1,5 +1,6 @@
 ﻿using LarDePaz_API.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace LarDePaz_API.DAL.DB
 {
@@ -21,9 +22,7 @@ namespace LarDePaz_API.DAL.DB
             builder.Entity<ParcelaContratoHistorial>().HasQueryFilter(x => x.DeletedAt == null);
             builder.Entity<User>().HasQueryFilter(x => x.DeletedAt == null);
             builder.Entity<Zona>().HasQueryFilter(x => x.DeletedAt == null);
-            builder.Entity<ZonaParcela>().HasQueryFilter(x => x.DeletedAt == null);
 
-            // Agregar el filtro de los que tienen un no fecha de baja
 
         }
 
@@ -40,7 +39,6 @@ namespace LarDePaz_API.DAL.DB
         public DbSet<Role> Role { get; set; }
         public DbSet<User> User { get; set; }
         public DbSet<Zona> Zona { get; set; }
-        public DbSet<ZonaParcela> ZonaParcela { get; set; }
 
 
 

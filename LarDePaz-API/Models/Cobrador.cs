@@ -7,10 +7,10 @@ namespace LarDePaz_API.Models
         [Key]
         public int Id { get; set; }
         public int ZonaId { get; set; }
+
         public string NombreApellido { get; set; } = null!;
         public string DNI { get; set; } = null!;
-
-        [ForeignKey("ZonaId")]
-        public virtual Zona Zona { get; set; } = null!;
+        public string? Telefono { get; set; }
+        public string? ZonaDeCobro { get; set; }
     }
 }
