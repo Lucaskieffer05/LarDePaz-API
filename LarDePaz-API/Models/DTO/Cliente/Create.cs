@@ -1,13 +1,7 @@
 ﻿namespace LarDePaz_API.Models.DTO.Cliente
 {
-    public class GetOneRequest
+    public class CreateRequest
     {
-        public int Id { get; set; }
-    }
-    
-    public class GetOneResponse
-    {
-        public int Id { get; set; }
         public string NombreApellido { get; set; } = null!;
         public string DNI { get; set; } = null!;
         public string Direccion { get; set; } = null!;
@@ -17,16 +11,10 @@
         public string? Telefono2 { get; set; }
         public string? Email { get; set; }
         public string? RedSocial { get; set; }
-        public List<Item> Contratos { get; set; } = [];
-
-        public class Item
-        {
-            public int Id { get; set; }
-            public int Saldo { get; set; }
-            public int CantidadParcelas { get; set; }
-            public string Estado { get; set; } = null!;
-        }
-
     }
 
+    public class CreateResponse
+    {
+        public int Id { get; set; }
+    }
 }

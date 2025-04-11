@@ -6,7 +6,6 @@ namespace LarDePaz_API.Models
     {
         [Key]
         public int Id { get; set; }
-        public int ZonaId { get; set; }
 
         public string NombreApellido { get; set; } = null!;
         public string DNI { get; set; } = null!;

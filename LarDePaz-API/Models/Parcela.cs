@@ -13,7 +13,7 @@ namespace LarDePaz_API.Models
         public int Columna { get; set; }
 
         [ForeignKey("ZonaId")]
-        public virtual Zona? Zona { get; set; }
+        public virtual Zona Zona { get; set; } = null!;
 
         public List<ParcelaContratoHistorial> ContratosHistorial { get; set; } = [];
     }
