@@ -35,6 +35,9 @@
         public string? Tarjeta { get; set; }
         public DateTime FechaContrato { get; set; }
         public string Estado { get; set; } = null!;
+
+        public int CantidadCuotas { get; set; }
+        public int PrecioTotalDeCompra { get; set; }
     }
 
     public class CreateResponse

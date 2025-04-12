@@ -2,6 +2,7 @@
 {
     public class UpdateReques
     {
+        public int Id { get; set; }
         public int CobradorId { get; set; }
         public int TitularId { get; set; }
 
@@ -34,6 +35,5 @@
         public string ProvinciaPago { get; set; } = null!;
         public string? Tarjeta { get; set; }
         public DateTime FechaContrato { get; set; }
-        public string Estado { get; set; } = null!;
     }
 }

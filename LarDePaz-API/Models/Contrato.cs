@@ -8,8 +8,6 @@ namespace LarDePaz_API.Models
         public int Id { get; set; }
         public int CobradorId { get; set; }
         public int TitularId { get; set; }
-        public int ContratoCuotaHistorialId { get; set; }
-        public int ContratoExpensasHistorialId { get; set; }
 
         //Campos para el COtitular
         public string NombreCoTitular { get; set; } = null!;
@@ -40,12 +38,9 @@ namespace LarDePaz_API.Models
         public string ProvinciaPago { get; set; } = null!;
         public string? Tarjeta { get; set; }
         public DateTime FechaContrato { get; set; } = DateTime.Now;
-        public int Saldo { get; set; }
         public int CantidadCuotas { get; set; }
-        public int CuotasEmitidas { get; set; }
-        public int PagoAcumulado { get; set; }
-        public int CantidadParcelas { get; set; }
         public string Estado { get; set; } = null!;
+        public bool GenerarExpensas { get; set; } = false;
 
         [ForeignKey("TitularId")]
         public virtual Cliente Titular { get; set; } = null!;
@@ -53,12 +48,8 @@ namespace LarDePaz_API.Models
         [ForeignKey("CobradorId")]
         public virtual Cobrador? Cobrador { get; set; }
 
-        [ForeignKey("ContratoCuotaHistorialId")]
-        public virtual ContratoCuotaHistorial ContratoCuotaHistorial { get; set; } = null!;
-
-        [ForeignKey("ContratoExpensasHistorialId")]
-        public virtual ContratoExpensasHistorial ContratoExpensasHistorial { get; set; } = null!;
-
+        public List<Cuota> Cuotas { get; set; } = [];
+        public List<Expensa> Expensas { get; set; } = [];
         public List<Parcela> Parcelas { get; set; } = [];
 
 

@@ -4,6 +4,8 @@ using LarDePaz_API.Models;
 using LarDePaz_API.Models.DTO;
 using LarDePaz_API.Models.DTO.Contrato;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using static LarDePaz_API.Models.DTO.Contrato.GetOneResponse;
 
 namespace LarDePaz_API.Services
 {
@@ -15,7 +17,7 @@ namespace LarDePaz_API.Services
         public async Task<BaseResponse<GetAllResponse>> GetAll(GetAllRequest rq)
         {
             var response = new BaseResponse<GetAllResponse>();
-            
+
             var query = _db.Contrato.AsQueryable();
 
             query = OrderQuery(query, rq);
@@ -33,8 +35,8 @@ namespace LarDePaz_API.Services
                         NombreCoTitular = x.NombreCoTitular,
                         NombreSegundoTitular = x.NombreSegundoTitular,
                         FechaContrato = x.FechaContrato,
-                        Saldo = x.Saldo,
-                        CantidadParcelas = x.CantidadParcelas,
+                        SaldoExpensas = CalcularSaldoExpensas(x.Expensas),
+                        CantidadParcelas = x.Parcelas.Count,
                         Estado = x.Estado
                     })
                     .ToListAsync()
@@ -53,10 +55,8 @@ namespace LarDePaz_API.Services
                 .Where(x => x.Id == rq.Id)
                 .Include(x => x.Titular)
                 .Include(x => x.Cobrador)
-                .Include(x => x.ContratoCuotaHistorial)
-                .ThenInclude(x => x.Cuotas)
-                .Include(x => x.ContratoExpensasHistorial)
-                .ThenInclude(x => x.Expensas)
+                .Include(x => x.Cuotas)
+                .Include(x => x.Expensas)
                 .Include(x => x.Parcelas)
                 .ThenInclude(x => x.Zona)
                 .ThenInclude(x => x.Manzana)
@@ -65,8 +65,6 @@ namespace LarDePaz_API.Services
                     Id = x.Id,
                     CobradorId = x.CobradorId,
                     TitularId = x.TitularId,
-                    ContratoCuotaHistorialId = x.ContratoCuotaHistorialId,
-                    ContratoExpensasHistorialId = x.ContratoExpensasHistorialId,
                     NombreCoTitular = x.NombreCoTitular,
                     DNICoTitular = x.DNICoTitular,
                     DireccionCoTitular = x.DireccionCoTitular,
@@ -91,12 +89,15 @@ namespace LarDePaz_API.Services
                     ProvinciaPago = x.ProvinciaPago,
                     Tarjeta = x.Tarjeta,
                     FechaContrato = x.FechaContrato,
-                    Saldo = x.Saldo,
+                    SaldoExpensas = CalcularSaldoExpensas(x.Expensas),
                     CantidadCuotas = x.CantidadCuotas,
-                    CuotasEmitidas = x.CuotasEmitidas,
-                    PagoAcumulado = x.PagoAcumulado,
-                    CantidadParcelas = x.CantidadParcelas,
+                    CuotasEmitidas = CuotasEmitidas(x.Cuotas),
+                    ImporteTotalCuotas = CalcularImporteTotalCuotas(x.Cuotas),
+                    PagoAcumulado = CalcularPagoAcumuladoCuotas(x.Cuotas),
+                    SaldoCuotas = CalcularSaldoCuotas(x.Cuotas),
+                    CantidadParcelas = x.Parcelas.Count,
                     Estado = x.Estado,
+                    GenerarExpensas = x.GenerarExpensas,
                     Titular = new GetOneResponse.ClienteDTO
                     {
                         Id = x.Titular.Id,
@@ -118,45 +119,30 @@ namespace LarDePaz_API.Services
                         Telefono = x.Cobrador.Telefono,
                         ZonaDeCobro = x.Cobrador.ZonaDeCobro
                     },
-                    ContratoCuotaHistorial = new GetOneResponse.ContratoCuotaHistorialDTO
+                    Cuotas = x.Cuotas.Select(c => new GetOneResponse.CuotaDTO
                     {
-                        Id = x.ContratoCuotaHistorial.Id,
-                        ImporteTotalPagado = x.ContratoCuotaHistorial.ImporteTotalPagado,
-                        ImporteTotalCuota = x.ContratoCuotaHistorial.ImporteTotalCuota,
-                        Saldo = x.ContratoCuotaHistorial.Saldo,
-                        Cuotas = x.ContratoCuotaHistorial.Cuotas.Select(c => new GetOneResponse.ContratoCuotaHistorialDTO.CuotaDTO
-                        {
-                            Id = c.Id,
-                            NumeroCuota = c.NumeroCuota,
-                            FechaEmitida = c.FechaEmitida,
-                            FechaVencimiento = c.FechaVencimiento,
-                            FechaPago = c.FechaPago,
-                            Importe = c.Importe,
-                            importePagado = c.importePagado,
-                            ImporteInteres = c.ImporteInteres,
-                            ImporteTotal = c.ImporteTotal,
-                            Estado = c.Estado
-                        }).ToList()
-                    },
-                    ContratoExpensasHistorial = new GetOneResponse.ContratoExpensasHistorialDTO
+                        Id = c.Id,
+                        NumeroCuota = c.NumeroCuota,
+                        FechaEmitida = c.FechaEmitida,
+                        FechaVencimiento = c.FechaVencimiento,
+                        Importe = c.Importe,
+                        ImportePagado = c.ImportePagado,
+                        ImporteInteres = c.ImporteInteres,
+                        ImporteTotal = c.ImporteInteres + c.Importe,
+                        Estado = c.Estado
+                    }).ToList(),
+                    Expensas = x.Expensas.Select(e => new GetOneResponse.ExpensaDTO
                     {
-                        Id = x.ContratoExpensasHistorial.Id,
-                        ImporteTotalPagado = x.ContratoExpensasHistorial.ImporteTotalPagado,
-                        ImporteTotalExpensa = x.ContratoExpensasHistorial.ImporteTotalExpensa,
-                        Saldo = x.ContratoExpensasHistorial.Saldo,
-                        Expensas = x.ContratoExpensasHistorial.Expensas.Select(e => new GetOneResponse.ContratoExpensasHistorialDTO.ExpensaDTO
-                        {
-                            Id = e.Id,
-                            NumPeriodo = e.NumPeriodo,
-                            YearPeriodo = e.YearPeriodo,
-                            Importe = e.Importe,
-                            ImportePagado = e.ImportePagado,
-                            FechaDesde = e.FechaDesde,
-                            FechaHasta = e.FechaHasta,
-                            FechaPago = e.FechaPago,
-                            Estado = e.Estado
-                        }).ToList()
-                    },
+                        Id = e.Id,
+                        FechaDesde = e.FechaDesde,
+                        FechaHasta = e.FechaHasta,
+                        FechaPago = e.FechaPago,
+                        NumPeriodo = e.NumPeriodo,
+                        YearPeriodo = e.YearPeriodo,
+                        Importe = e.Importe,
+                        ImportePagado = e.ImportePagado,
+                        Estado = e.Estado
+                    }).ToList(),
                     Parcelas = x.Parcelas.Select(p => new GetOneResponse.ParcelaDTO
                     {
                         Id = p.Id,
@@ -185,68 +171,303 @@ namespace LarDePaz_API.Services
             return response;
         }
 
-        public async Task<BaseResponse<CreateResponse> Create(CreateRequest rq)
+        public async Task<BaseResponse<CreateResponse>> Create(CreateRequest rq)
         {
-            // TO-DO HACER TODO ESTE EL PROCESO DE CREACION DE UN CONTRATO
-            // 1. CREAR TODAS LAS ENTIDADES, HISTORIALES, ETC
-            // 2. CREAR EL CONTRATO
-
             var response = new BaseResponse<CreateResponse>();
-            var contrato = new Contrato
+
+            // Validaciones
+            var validateString = ValidateCreateRequest(rq);
+            if (!string.IsNullOrEmpty(validateString))
             {
-                CobradorId = rq.CobradorId,
-                TitularId = rq.TitularId,
-                NombreCoTitular = rq.NombreCoTitular,
-                DNICoTitular = rq.DNICoTitular,
-                DireccionCoTitular = rq.DireccionCoTitular,
-                LocalidadCoTitular = rq.LocalidadCoTitular,
-                ProvinciaCoTitular = rq.ProvinciaCoTitular,
-                TelefonoCoTitular = rq.TelefonoCoTitular,
-                TelefonoCoTitular2 = rq.TelefonoCoTitular2,
-                EmailCoTitular = rq.EmailCoTitular,
-                RedSocialCoTitular = rq.RedSocialCoTitular,
-                NombreSegundoTitular = rq.NombreSegundoTitular,
-                DNISegundoTitular = rq.DNISegundoTitular,
-                DireccionSegundoTitular = rq.DireccionSegundoTitular,
-                LocalidadSegundoTitular = rq.LocalidadSegundoTitular,
-                ProvinciaSegundoTitular = rq.ProvinciaSegundoTitular,
-                TelefonoSegundoTitular = rq.TelefonoSegundoTitular,
-                TelefonoSegundoTitular2 = rq.TelefonoSegundoTitular2,
-                EmailSegundoTitular = rq.EmailSegundoTitular,
-                RedSocialSegundoTitular = rq.RedSocialSegundoTitular,
-                LugarPago = rq.LugarPago,
-                DireccionPago = rq.DireccionPago,
-                LocalidadPago = rq.LocalidadPago,
-                ProvinciaPago = rq.ProvinciaPago,
-                Tarjeta = rq.Tarjeta,
-                FechaContrato = DateTime.Now, // Asignar la fecha actual
-                Saldo = 0, // Inicializar el saldo a 0
-                CantidadCuotas = 0, // Inicializar la cantidad de cuotas a 0
-                CuotasEmitidas = 0, // Inicializar las cuotas emitidas a 0
-                PagoAcumulado = 0, // Inicializar el pago acumulado a 0
-                CantidadParcelas = 0, // Inicializar la cantidad de parcelas a 0
-                Estado = "Activo" // Asignar un estado inicial
-            };
-            _db.Contrato.Add(contrato);
-            await _db.SaveChangesAsync();
-            return response;
+                return response.SetError(Messages.Error.FieldRequired(validateString));
+            }
+
+            // Iniciar transacción
+            using var tx = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                // Crear el contrato
+                var contrato = new Contrato
+                {
+                    CobradorId = rq.CobradorId,
+                    TitularId = rq.TitularId,
+                    NombreCoTitular = rq.NombreCoTitular,
+                    DNICoTitular = rq.DNICoTitular,
+                    DireccionCoTitular = rq.DireccionCoTitular,
+                    LocalidadCoTitular = rq.LocalidadCoTitular,
+                    ProvinciaCoTitular = rq.ProvinciaCoTitular,
+                    TelefonoCoTitular = rq.TelefonoCoTitular,
+                    TelefonoCoTitular2 = rq.TelefonoCoTitular2,
+                    EmailCoTitular = rq.EmailCoTitular,
+                    RedSocialCoTitular = rq.RedSocialCoTitular,
+                    NombreSegundoTitular = rq.NombreSegundoTitular,
+                    DNISegundoTitular = rq.DNISegundoTitular,
+                    DireccionSegundoTitular = rq.DireccionSegundoTitular,
+                    LocalidadSegundoTitular = rq.LocalidadSegundoTitular,
+                    ProvinciaSegundoTitular = rq.ProvinciaSegundoTitular,
+                    TelefonoSegundoTitular = rq.TelefonoSegundoTitular,
+                    TelefonoSegundoTitular2 = rq.TelefonoSegundoTitular2,
+                    EmailSegundoTitular = rq.EmailSegundoTitular,
+                    RedSocialSegundoTitular = rq.RedSocialSegundoTitular,
+                    LugarPago = rq.LugarPago,
+                    DireccionPago = rq.DireccionPago,
+                    LocalidadPago = rq.LocalidadPago,
+                    ProvinciaPago = rq.ProvinciaPago,
+                    Tarjeta = rq.Tarjeta,
+                    FechaContrato = DateTime.Now,
+                    CantidadCuotas = rq.CantidadCuotas,
+                    Estado = "Activo",
+                };
+                _db.Contrato.Add(contrato);
+                await _db.SaveChangesAsync();
+
+                // Crear Cuotas
+                var cuotas = new List<Cuota>();
+                for (int i = 1; i <= rq.CantidadCuotas; i++)
+                {
+                    cuotas.Add(new Cuota
+                    {
+                        NumeroCuota = i.ToString(),
+                        FechaEmitida = DateTime.Now,
+                        FechaVencimiento = DateTime.Now.AddMonths(i), // Ejemplo: una cuota por mes
+                        Importe = rq.PrecioTotalDeCompra / rq.CantidadCuotas, // Asigna el importe de la cuota
+                        ImportePagado = 0,
+                        ImporteInteres = 0,
+                        Estado = "Pendiente",
+                        ContratoId = contrato.Id
+                    });
+                }
+                _db.Cuota.AddRange(cuotas);
+                await _db.SaveChangesAsync();
+
+
+                // Confirmar transacción
+                await tx.CommitAsync();
+
+                response.Data = new CreateResponse { Id = contrato.Id };
+                return response;
+            }
+            catch (Exception ex)
+            {
+                // Revertir cambios en caso de error
+                await tx.RollbackAsync();
+                return response.SetError($"Error al crear el contrato: {ex.Message}");
+            }
         }
 
+        public async Task<BaseResponse> Update(UpdateReques rq)
+        {
+            var response = new BaseResponse();
+            // Validaciones
+            var validateString = ValidateUpdateRequest(rq);
+            if (!string.IsNullOrEmpty(validateString))
+            {
+                return response.SetError(Messages.Error.FieldRequired(validateString));
+            }
+
+            
+            // Obtener el contrato existente
+            var contrato = await _db.Contrato
+                .Where(x => x.Id == rq.Id)
+                .FirstOrDefaultAsync();
+
+            if (contrato == null)
+            {
+                return response.SetError(Messages.Error.EntitiesNotFound("Contrato"));
+            }
+            // Actualizar los campos del contrato
+            contrato.CobradorId = rq.CobradorId;
+            contrato.TitularId = rq.TitularId;
+            contrato.NombreCoTitular = rq.NombreCoTitular;
+            contrato.DNICoTitular = rq.DNICoTitular;
+            contrato.DireccionCoTitular = rq.DireccionCoTitular;
+            contrato.LocalidadCoTitular = rq.LocalidadCoTitular;
+            contrato.ProvinciaCoTitular = rq.ProvinciaCoTitular;
+            contrato.TelefonoCoTitular = rq.TelefonoCoTitular;
+            contrato.TelefonoCoTitular2 = rq.TelefonoCoTitular2;
+            contrato.EmailCoTitular = rq.EmailCoTitular;
+            contrato.RedSocialCoTitular = rq.RedSocialCoTitular;
+            contrato.NombreSegundoTitular = rq.NombreSegundoTitular;
+            contrato.DNISegundoTitular = rq.DNISegundoTitular;
+            contrato.DireccionSegundoTitular = rq.DireccionSegundoTitular;
+            contrato.LocalidadSegundoTitular = rq.LocalidadSegundoTitular;
+            contrato.ProvinciaSegundoTitular = rq.ProvinciaSegundoTitular;
+            contrato.TelefonoSegundoTitular = rq.TelefonoSegundoTitular;
+            contrato.TelefonoSegundoTitular2 = rq.TelefonoSegundoTitular2;
+            contrato.EmailSegundoTitular = rq.EmailSegundoTitular;
+            contrato.RedSocialSegundoTitular = rq.RedSocialSegundoTitular;
+            contrato.LugarPago = rq.LugarPago;
+            contrato.DireccionPago = rq.DireccionPago;
+            contrato.LocalidadPago = rq.LocalidadPago;
+            contrato.ProvinciaPago = rq.ProvinciaPago;
+            contrato.Tarjeta = rq.Tarjeta;
+
+            try
+            {
+                _db.Contrato.Update(contrato);
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return response.SetError(Messages.Error.Exception());
+            }
+
+            response.Message = Messages.CRUD.EntityUpdated("Contrato");
+            return response;
+        }
 
         #endregion
 
 
-
+        #region Métodos privados
         private static IQueryable<Contrato> OrderQuery(IQueryable<Contrato> query, PaginateRequest rq)
         {
             return rq.ColumnSort switch
             {
                 "estado" => rq.SortDirection == SortDirectionCode.ASC ? query.OrderBy(x => x.Estado) : query.OrderByDescending(x => x.Estado),
-                "saldo" => rq.SortDirection == SortDirectionCode.ASC ? query.OrderBy(x => x.Saldo) : query.OrderByDescending(x => x.Saldo),
+                "nombreapellido" => rq.SortDirection == SortDirectionCode.ASC ? query.OrderBy(x => x.Titular.NombreApellido) : query.OrderByDescending(x => x.Titular.NombreApellido),
                 "createdAt" => rq.SortDirection == SortDirectionCode.ASC ? query.OrderBy(x => x.CreatedAt) : query.OrderByDescending(x => x.CreatedAt),
                 _ => query.OrderByDescending(x => x.CreatedAt),
             };
         }
+        private string ValidateCreateRequest(CreateRequest rq)
+        {
+            if (rq.TitularId <= 0)
+            {
+                return "Cobrador";
+            }
+            if (string.IsNullOrEmpty(rq.NombreCoTitular))
+            {
+                return "Nombre del CoTitular";
+            }
+            if (string.IsNullOrEmpty(rq.DNICoTitular))
+            {
+                return "DNI del CoTitular";
+            }
+            if (string.IsNullOrEmpty(rq.DireccionCoTitular))
+            {
+                return "Dirección del CoTitular";
+            }
+            if (string.IsNullOrEmpty(rq.LocalidadCoTitular))
+            {
+                return "Localidad del CoTitular";
+            }
+            if (string.IsNullOrEmpty(rq.ProvinciaCoTitular))
+            {
+                return "Provincia del CoTitular";
+            }
+            if (string.IsNullOrEmpty(rq.TelefonoCoTitular))
+            {
+                return "Teléfono del CoTitular";
+            }
+            if (string.IsNullOrEmpty(rq.LugarPago))
+            {
+                return "Lugar de Pago";
+            }
+            if (string.IsNullOrEmpty(rq.DireccionPago))
+            {
+                return "Dirección de Pago";
+            }
+            if (string.IsNullOrEmpty(rq.LocalidadPago))
+            {
+                return "Localidad de Pago";
+            }
+            if (string.IsNullOrEmpty(rq.ProvinciaPago))
+            {
+                return "Provincia de Pago";
+            }
 
+            // Si todas las validaciones pasan, devolver una cadena vacía
+            return string.Empty;
+        }
+        private string ValidateUpdateRequest(UpdateReques rq) {
+            if (rq.TitularId <= 0)
+            {
+                return "Cobrador";
+            }
+            if (string.IsNullOrEmpty(rq.NombreCoTitular))
+            {
+                return "Nombre del CoTitular";
+            }
+            if (string.IsNullOrEmpty(rq.DNICoTitular))
+            {
+                return "DNI del CoTitular";
+            }
+            if (string.IsNullOrEmpty(rq.DireccionCoTitular))
+            {
+                return "Dirección del CoTitular";
+            }
+            if (string.IsNullOrEmpty(rq.LocalidadCoTitular))
+            {
+                return "Localidad del CoTitular";
+            }
+            if (string.IsNullOrEmpty(rq.ProvinciaCoTitular))
+            {
+                return "Provincia del CoTitular";
+            }
+            if (string.IsNullOrEmpty(rq.TelefonoCoTitular))
+            {
+                return "Teléfono del CoTitular";
+            }
+            if (string.IsNullOrEmpty(rq.LugarPago))
+            {
+                return "Lugar de Pago";
+            }
+            if (string.IsNullOrEmpty(rq.DireccionPago))
+            {
+                return "Dirección de Pago";
+            }
+            if (string.IsNullOrEmpty(rq.LocalidadPago))
+            {
+                return "Localidad de Pago";
+            }
+            if (string.IsNullOrEmpty(rq.ProvinciaPago))
+            {
+                return "Provincia de Pago";
+            }
+
+            // Si todas las validaciones pasan, devolver una cadena vacía
+            return string.Empty;
+        }
+        private int CalcularSaldoExpensas(List<Expensa> expensas)
+        {
+            return expensas.Sum(e => e.Importe) - expensas.Sum(e => e.ImportePagado);
+        }
+        private int CalcularSaldoCuotas(List<Cuota> cuotas)
+        {
+            return cuotas.Count(e => e.Estado == "Pendiente") > 0 ? cuotas.Sum(e => e.Importe + e.ImporteInteres) - cuotas.Sum(e => e.ImportePagado) : 0;
+        }
+        private int CuotasEmitidas(List<Cuota> cuotas)
+        {
+            return cuotas.Count(c => c.Estado == "Emitida");
+        }
+        private int CalcularPagoAcumuladoCuotas(List<Cuota> cuotas)
+        {
+            return cuotas.Sum(c => c.ImportePagado);
+        }
+        private int CalcularImporteTotalCuotas (List<Cuota> cuotas)
+        {
+            return cuotas.Sum(c => c.Importe + c.ImporteInteres);
+        }
+        private List<Cuota> CrearCuotas(int cantidadCuotas, int precioTotalDeCompra, int contratoId)
+        {
+            var cuotas = new List<Cuota>();
+            for (int i = 1; i <= cantidadCuotas; i++)
+            {
+                cuotas.Add(new Cuota
+                {
+                    NumeroCuota = i.ToString(),
+                    FechaEmitida = DateTime.Now,
+                    FechaVencimiento = DateTime.Now.AddMonths(i), // Ejemplo: una cuota por mes
+                    Importe = precioTotalDeCompra / cantidadCuotas, // Asigna el importe de la cuota
+                    ImportePagado = 0,
+                    ImporteInteres = 0,
+                    Estado = "Pendiente",
+                    ContratoId = contratoId
+                });
+            }
+            return cuotas;
+        }
+        #endregion
     }
 }

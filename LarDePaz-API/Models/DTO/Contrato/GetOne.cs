@@ -13,8 +13,6 @@ namespace LarDePaz_API.Models.DTO.Contrato
         public int Id { get; set; }
         public int CobradorId { get; set; }
         public int TitularId { get; set; }
-        public int ContratoCuotaHistorialId { get; set; }
-        public int ContratoExpensasHistorialId { get; set; }
 
         //Campos para el COtitular
         public string NombreCoTitular { get; set; } = null!;
@@ -45,17 +43,25 @@ namespace LarDePaz_API.Models.DTO.Contrato
         public string ProvinciaPago { get; set; } = null!;
         public string? Tarjeta { get; set; }
         public DateTime FechaContrato { get; set; } = DateTime.Now;
-        public int Saldo { get; set; }
+
+        // Expensas fields
+        public int SaldoExpensas { get; set; }
+
+        // Cuotas fields
         public int CantidadCuotas { get; set; }
         public int CuotasEmitidas { get; set; }
+        public int ImporteTotalCuotas { get; set; }
         public int PagoAcumulado { get; set; }
+        public int SaldoCuotas { get; set; }
+
         public int CantidadParcelas { get; set; }
         public string Estado { get; set; } = null!;
+        public bool GenerarExpensas { get; set; } = false;
 
         public ClienteDTO Titular { get; set; } = null!;
         public CobradorDTO? Cobrador { get; set; } = null!;
-        public ContratoCuotaHistorialDTO ContratoCuotaHistorial { get; set; } = null!;
-        public ContratoExpensasHistorialDTO ContratoExpensasHistorial { get; set; } = null!;
+        public List<CuotaDTO> Cuotas { get; set; } = [];
+        public List<ExpensaDTO> Expensas { get; set; } = [];
         public List<ParcelaDTO> Parcelas { get; set; } = [];
 
         public class ClienteDTO
@@ -81,49 +87,34 @@ namespace LarDePaz_API.Models.DTO.Contrato
             public string? ZonaDeCobro { get; set; }
         }
 
-        public class ContratoCuotaHistorialDTO
+        
+        public class CuotaDTO
         {
             public int Id { get; set; }
-            public int ImporteTotalPagado { get; set; }
-            public int ImporteTotalCuota { get; set; }
-            public int Saldo { get; set; }
-            public List<CuotaDTO> Cuotas { get; set; } = [];
-            public class CuotaDTO
-            {
-                public int Id { get; set; }
-                public string NumeroCuota { get; set; } = null!;
-                public DateTime FechaEmitida { get; set; }
-                public DateTime FechaVencimiento { get; set; }
-                public DateTime FechaPago { get; set; }
-                public int Importe { get; set; }
-                public int importePagado { get; set; }
-                public int ImporteInteres { get; set; }
-                public int ImporteTotal { get; set; }
-                public string Estado { get; set; } = null!;
-            }
+            public string NumeroCuota { get; set; } = null!;
+            public DateTime FechaEmitida { get; set; }
+            public DateTime FechaVencimiento { get; set; }
+            public DateTime FechaPago { get; set; }
+            public int Importe { get; set; }
+            public int ImportePagado { get; set; }
+            public int ImporteInteres { get; set; }
+            public int ImporteTotal { get; set; }
+            public string Estado { get; set; } = null!;
         }
-
-        public class ContratoExpensasHistorialDTO
+        
+        public class ExpensaDTO
         {
             public int Id { get; set; }
-            public int ImporteTotalPagado { get; set; }
-            public int ImporteTotalExpensa { get; set; }
-            public int Saldo { get; set; }
-            public List<ExpensaDTO> Expensas { get; set; } = [];
-            public class ExpensaDTO
-            {
-                public int Id { get; set; }
-                public int NumPeriodo { get; set; }
-                public int YearPeriodo { get; set; }
-                public int Importe { get; set; }
-                public int ImportePagado { get; set; }
-                public DateTime FechaDesde { get; set; }
-                public DateTime FechaHasta { get; set; }
-                public DateTime FechaPago { get; set; }
-                public string Estado { get; set; } = null!;
-            }
+            public int NumPeriodo { get; set; }
+            public int YearPeriodo { get; set; }
+            public int Importe { get; set; }
+            public int ImportePagado { get; set; }
+            public DateTime FechaDesde { get; set; }
+            public DateTime FechaHasta { get; set; }
+            public DateTime FechaPago { get; set; }
+            public string Estado { get; set; } = null!;
         }
-
+        
         public class ParcelaDTO
         {
             public int Id { get; set; }
@@ -144,7 +135,5 @@ namespace LarDePaz_API.Models.DTO.Contrato
                 }
             }
         }
-
-
     }
 }

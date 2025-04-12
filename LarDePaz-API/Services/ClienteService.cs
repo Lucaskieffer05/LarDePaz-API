@@ -50,6 +50,11 @@ namespace LarDePaz_API.Services
                 .AsNoTracking()
                 .Where(x => x.Id == rq.Id)
                 .Include(x => x.Contratos)
+                .ThenInclude(c => c.Cuotas)
+                .Include(x => x.Contratos)
+                .ThenInclude(c => c.Parcelas)
+                .Include(x => x.Contratos)
+                .ThenInclude(c => c.Expensas)
                 .Select(x => new GetOneResponse
                 {
                     Id = x.Id,
@@ -62,11 +67,12 @@ namespace LarDePaz_API.Services
                     Telefono2 = x.Telefono2,
                     Email = x.Email,
                     RedSocial = x.RedSocial,
-                    Contratos = x.Contratos.Select(c => new GetOneResponse.Item
+                    Contratos = x.Contratos.Select(c => new GetOneResponse.ContratoDTO
                     {
                         Id = c.Id,
-                        Saldo = c.Saldo,
-                        CantidadParcelas = c.CantidadParcelas,
+                        SaldoExpensas = CalcularSaldoExpensas(c.Expensas),
+                        SaldoCuota = CalcularSaldoExpensas(c.Expensas),
+                        CantidadParcelas = c.Parcelas.Count,
                         Estado = c.Estado
                     }).ToList()
                 })
@@ -118,6 +124,11 @@ namespace LarDePaz_API.Services
                 return response.SetError(Messages.Error.SaveEntity("Cliente"));
             }
 
+            response.Data = new CreateResponse
+            {
+                Id = cliente.Id
+            };
+
             response.Message = Messages.CRUD.EntityCreated("Cliente");
             return response;
         }
@@ -152,8 +163,10 @@ namespace LarDePaz_API.Services
             cliente.Email = rq.Email;
             cliente.RedSocial = rq.RedSocial;
 
+
             try
             {
+                _db.Cliente.Update(cliente);
                 await _db.SaveChangesAsync();
             }
             catch (Exception)
@@ -320,7 +333,15 @@ namespace LarDePaz_API.Services
             return true;
         }
 
+        private int CalcularSaldoExpensas(List<Expensa> expensas)
+        {
+            return expensas.Sum(e => e.Importe) - expensas.Sum(e => e.ImportePagado);
+        }
 
+        private int CalcularSaldoCuotas(List<Cuota> cuotas)
+        {
+            return cuotas.Count(e => e.Estado == "Pendiente") > 0 ? cuotas.Sum(e => e.Importe + e.ImporteInteres) - cuotas.Sum(e => e.ImportePagado) : 0;
+        }
 
         #endregion
 

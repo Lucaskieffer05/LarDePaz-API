@@ -6,7 +6,7 @@ namespace LarDePaz_API.Models
     {
         [Key]
         public int Id { get; set; }
-        public int ContratoExpensasHistorialId { get; set; }
+        public int ContratoId { get; set; }
         public int NumPeriodo { get; set; }
         public int YearPeriodo { get; set; }
         public int Importe { get; set; }
@@ -16,8 +16,8 @@ namespace LarDePaz_API.Models
         public DateTime FechaPago { get; set; }
         public string Estado { get; set; } = null!;
 
-        [ForeignKey("ContratoExpensasHistorialId")]
-        public virtual ContratoExpensasHistorial ContratoExpensasHistorial { get; set; } = null!;
+        [ForeignKey("ContratoId")]
+        public virtual Contrato Contrato { get; set; } = null!;
 
     }
 }
