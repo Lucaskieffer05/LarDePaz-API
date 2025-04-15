@@ -1,6 +1,6 @@
 ﻿namespace LarDePaz_API.Models.DTO.Contrato
 {
-    public class UpdateReques
+    public class UpdateRequest
     {
         public int Id { get; set; }
         public int CobradorId { get; set; }

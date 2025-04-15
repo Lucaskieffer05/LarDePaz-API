@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using LarDePaz_API.DAL.DB;
 using LarDePaz_API.DAL.Seeding;
@@ -17,12 +18,9 @@ var connectionString = builder.Configuration.GetConnectionString("APIContextConn
 ServiceContainer.AddServices(builder.Services);
 builder.Services.AddScoped<ISeeder, Seeder>();
 
-builder.Services.AddControllers();
-
 
 // Add Entity Framework service
 builder.Services.AddDbContextFactory<APIContext>(options => options.UseSqlServer(connectionString));
-
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -55,7 +53,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy(Policies.Admin, policy => policy.Requirements.Add(new AuthorizeRolesAttribute(Roles.ADMIN)))
@@ -63,11 +60,13 @@ builder.Services.AddAuthorizationBuilder()
 
 var app = builder.Build();
 
+//builder.Services.AddOpenApi();
+
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+/*if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-}
+}*/
 
 app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
@@ -77,9 +76,9 @@ await Seed();
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
-
 app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapControllers();
 

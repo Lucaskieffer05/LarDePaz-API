@@ -255,7 +255,7 @@ namespace LarDePaz_API.Services
             }
         }
 
-        public async Task<BaseResponse> Update(UpdateReques rq)
+        public async Task<BaseResponse> Update(UpdateRequest rq)
         {
             var response = new BaseResponse();
             // Validaciones
@@ -380,7 +380,7 @@ namespace LarDePaz_API.Services
             // Si todas las validaciones pasan, devolver una cadena vacía
             return string.Empty;
         }
-        private string ValidateUpdateRequest(UpdateReques rq) {
+        private string ValidateUpdateRequest(UpdateRequest rq) {
             if (rq.TitularId <= 0)
             {
                 return "Cobrador";

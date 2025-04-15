@@ -7,6 +7,9 @@
             // User and Auth
             services.AddScoped<TokenService>();
             services.AddScoped<AuthService>();
+            services.AddScoped<ClienteService>();
+            services.AddScoped<ContratoService>();
+
             //services.AddScoped<UserService>();
 
             // Basic CRUDs
