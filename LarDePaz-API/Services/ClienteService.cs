@@ -22,7 +22,7 @@ namespace LarDePaz_API.Services
             response.Data = new GetAllResponse
             {
                 Clientes = await query
-                    .Skip(rq.Page * rq.PageSize)
+                    .Skip((rq.Page - 1) * rq.PageSize)
                     .Take(rq.PageSize)
                     .Select(x => new GetAllResponse.Item
                     {
@@ -32,7 +32,7 @@ namespace LarDePaz_API.Services
                         Direccion = x.Direccion,
                         Localidad = x.Localidad,
                         Provincia = x.Provincia,
-                        Telefone = x.Telefono1,
+                        Telefono = x.Telefono1,
                         CreatedAt = x.CreatedAt
                     })
                     .ToListAsync()

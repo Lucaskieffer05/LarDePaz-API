@@ -36,7 +36,7 @@ namespace LarDePaz_API.Services
             if (user.Role == null)
                 return response.SetError(Messages.Error.UserWithoutRole());
 
-            var expiration = DateTime.Now.AddDays(30);
+            var expiration = DateTime.Now.AddDays(1);
             var token = _tokenService.GenerateToken(user, user.Role.Name, expiration);
 
             if (string.IsNullOrEmpty(token))

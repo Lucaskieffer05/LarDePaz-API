@@ -38,6 +38,7 @@
 
         public int CantidadCuotas { get; set; }
         public int PrecioTotalDeCompra { get; set; }
+        public List<int> ParcelasId { get; set; } = []!;
     }
 
     public class CreateResponse

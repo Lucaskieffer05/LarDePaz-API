@@ -8,12 +8,16 @@ namespace LarDePaz_API.Models
         [Key]
         public int Id { get; set; }
         public int ZonaId { get; set; }
+        public int? ContratoId { get; set; } 
 
         public int Fila { get; set; } 
         public int Columna { get; set; }
 
         [ForeignKey("ZonaId")]
         public virtual Zona Zona { get; set; } = null!;
+
+        [ForeignKey("ContratoId")]
+        public virtual Contrato? Contrato { get; set; }
 
         public List<ParcelaContratoHistorial> ContratosHistorial { get; set; } = [];
     }

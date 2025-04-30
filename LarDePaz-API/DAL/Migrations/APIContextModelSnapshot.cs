@@ -74,7 +74,7 @@ namespace LarDePaz_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cliente");
+                    b.ToTable("Cliente", (string)null);
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.Cobrador", b =>
@@ -110,7 +110,7 @@ namespace LarDePaz_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cobrador");
+                    b.ToTable("Cobrador", (string)null);
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.Contrato", b =>
@@ -234,7 +234,7 @@ namespace LarDePaz_API.Migrations
 
                     b.HasIndex("TitularId");
 
-                    b.ToTable("Contrato");
+                    b.ToTable("Contrato", (string)null);
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.Cuota", b =>
@@ -287,7 +287,7 @@ namespace LarDePaz_API.Migrations
 
                     b.HasIndex("ContratoId");
 
-                    b.ToTable("Cuota");
+                    b.ToTable("Cuota", (string)null);
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.Expensa", b =>
@@ -339,7 +339,7 @@ namespace LarDePaz_API.Migrations
 
                     b.HasIndex("ContratoId");
 
-                    b.ToTable("Expensa");
+                    b.ToTable("Expensa", (string)null);
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.Manzana", b =>
@@ -377,7 +377,7 @@ namespace LarDePaz_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Manzana");
+                    b.ToTable("Manzana", (string)null);
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.Parcela", b =>
@@ -415,7 +415,7 @@ namespace LarDePaz_API.Migrations
 
                     b.HasIndex("ZonaId");
 
-                    b.ToTable("Parcela");
+                    b.ToTable("Parcela", (string)null);
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.ParcelaContratoHistorial", b =>
@@ -453,7 +453,7 @@ namespace LarDePaz_API.Migrations
 
                     b.HasIndex("ParcelaId");
 
-                    b.ToTable("ParcelaContratoHistorial");
+                    b.ToTable("ParcelaContratoHistorial", (string)null);
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.Role", b =>
@@ -470,7 +470,7 @@ namespace LarDePaz_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Role");
+                    b.ToTable("Role", (string)null);
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.User", b =>
@@ -513,7 +513,7 @@ namespace LarDePaz_API.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("User");
+                    b.ToTable("User", (string)null);
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.Zona", b =>
@@ -549,7 +549,7 @@ namespace LarDePaz_API.Migrations
 
                     b.HasIndex("ManzanaId");
 
-                    b.ToTable("Zona");
+                    b.ToTable("Zona", (string)null);
                 });
 
             modelBuilder.Entity("LarDePaz_API.Models.Contrato", b =>

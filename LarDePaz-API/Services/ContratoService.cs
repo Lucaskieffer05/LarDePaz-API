@@ -181,9 +181,19 @@ namespace LarDePaz_API.Services
             {
                 return response.SetError(Messages.Error.FieldRequired(validateString));
             }
+            foreach (var parcelaId in rq.ParcelasId)
+            {
+                var parcela = await _db.Parcela
+                    .Where(x => x.Id == parcelaId)
+                    .FirstOrDefaultAsync();
+                if (parcela == null)
+                {
+                    return response.SetError(Messages.Error.EntitiesNotFound("Parcela"));
+                }
+            }
 
-            // Iniciar transacción
-            using var tx = await _db.Database.BeginTransactionAsync();
+                // Iniciar transacción
+                using var tx = await _db.Database.BeginTransactionAsync();
             try
             {
                 // Crear el contrato
@@ -239,6 +249,31 @@ namespace LarDePaz_API.Services
                 }
                 _db.Cuota.AddRange(cuotas);
                 await _db.SaveChangesAsync();
+
+
+                if (rq.ParcelasId != null && rq.ParcelasId.Any())
+                {
+                    foreach (var parcelaId in rq.ParcelasId)
+                    {
+                        // Actualizar el campo ContratoId en la parcela
+                        var parcela = await _db.Parcela.FindAsync(parcelaId);
+                        if (parcela != null)
+                        {
+                            parcela.ContratoId = contrato.Id;
+                            _db.Parcela.Update(parcela);
+
+                            // Registrar en el historial
+                            var historial = new ParcelaContratoHistorial
+                            {
+                                ParcelaId = parcelaId,
+                                ContratoId = contrato.Id,
+                                FechaInicio = DateTime.Now
+                            };
+                            _db.ParcelaContratoHistorial.Add(historial);
+                        }
+                    }
+                    await _db.SaveChangesAsync();
+                }
 
 
                 // Confirmar transacción
@@ -376,6 +411,19 @@ namespace LarDePaz_API.Services
             {
                 return "Provincia de Pago";
             }
+            if (rq.CantidadCuotas <= 0)
+            {
+                return "Cantidad de Cuotas";
+            }
+            if (rq.PrecioTotalDeCompra <= 0)
+            {
+                return "Precio Total de Compra";
+            }
+            if (rq.ParcelasId == null || rq.ParcelasId.Count == 0)
+            {
+                return "Parcelas";
+            }
+
 
             // Si todas las validaciones pasan, devolver una cadena vacía
             return string.Empty;

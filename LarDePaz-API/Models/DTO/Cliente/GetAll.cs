@@ -16,7 +16,7 @@
             public string Direccion { get; set; } = null!;
             public string Localidad { get; set; } = null!;
             public string Provincia { get; set; } = null!;
-            public string Telefone { get; set; } = null!;
+            public string Telefono { get; set; } = null!;
             public DateTime CreatedAt { get; set; }
         }
     }
